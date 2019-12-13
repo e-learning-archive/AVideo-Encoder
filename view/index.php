@@ -54,7 +54,7 @@ $ad = $config->getAutodelete();
 
         <title>Encoder</title>
         <link rel="icon" href="view/img/favicon.png">
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <link href="view/css/font-awesome-4.7.0/font-awesome.min.css" rel="stylesheet">
         <script src="view/js/jquery-3.2.0.min.js" type="text/javascript"></script>
         <link href="view/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
         <script src="view/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
