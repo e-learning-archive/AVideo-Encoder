@@ -356,24 +356,24 @@ if (!empty($_GET['noNavbar'])) {
                         <div class="panel-body">
 
                             <ul class="nav nav-tabs">
-                                <li class="active"><a data-toggle="tab" href="#upload"><i class="fa fa-file" aria-hidden="true"></i> From File</a></li>
-                                <li ><a data-toggle="tab" href="#download"><i class="fa fa-globe" aria-hidden="true"></i> Import Video</a></li>
-                                <?php
-                                if (Login::canBulkEncode()) {
-                                    ?>
-                                    <li><a data-toggle="tab" href="#bulk"><span class="glyphicon glyphicon-duplicate"></span> Bulk Encode</a></li>
-                                <?php } ?>
+                                <li class="active"><a data-toggle="tab" href="#coursera"><i class="fa fa-infinity" aria-hidden="true"></i>∞ Coursera</a></li>
+                                <li ><a data-toggle="tab" href="#edx"><i class="fa fa-globe" aria-hidden="true"></i> edX</a></li>
+                                <li ><a data-toggle="tab" href="#download"><i class="fa fa-youtube" aria-hidden="true"></i> YouTube / others</a></li>
+                                <li ><a data-toggle="tab" href="#upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Upload</a></li>
                             </ul>
 
                             <div class="tab-content">
-                                <div id="upload" class="tab-pane fade in active">
-                                    <?php
-                                        include '../view/jquery-file-upload/form.php';
-                                    ?>
-                                </div>
-                                <div id="download" class="tab-pane fade">
+	                            <div id="coursera" class="tab-pane fade in active">
+		                            <?php require('e-learning-archive/coursera/tab.php'); ?>
+	                            </div>
+	                            <div id="edx" class="tab-pane fade">
+		                            <div class="alert alert-info">
+			                            <span class="glyphicon glyphicon-info-sign"></span> Share videos from edX.
+		                            </div>
+	                            </div>
+                                <div id="download" class="tab-pane fade ">
                                     <div class="alert alert-info">
-                                        <span class="glyphicon glyphicon-info-sign"></span> Share videos from YouTube and a few <a href="https://rg3.github.io/youtube-dl/supportedsites.html" target="_blank">more sites</a>.
+                                        <span class="glyphicon glyphicon-info-sign"></span> Share videos from YouTube and <a href="https://rg3.github.io/youtube-dl/supportedsites.html" target="_blank">many more sites</a>.
                                     </div>
                                     <form id="downloadForm" onsubmit="">
                                         <div class="form-group">
@@ -400,66 +400,18 @@ if (!empty($_GET['noNavbar'])) {
                                                     }
                                                     ?>
                                                 </select>
-                                            </div> 
+                                            </div>
                                             <?php
                                         }
                                         ?>
                                     </form>
                                 </div>
-
-                                <?php
-                                if (Login::canBulkEncode()) {
+                                <div id="upload" class="tab-pane fade">
+                                    <?php
+                                        include '../view/jquery-file-upload/form.php';
                                     ?>
-
-                                    <div id="bulk" class="tab-pane fade">
-                                        <div class="alert alert-info">
-                                            <span class="glyphicon glyphicon-info-sign pull-left" style="font-size: 2em; padding: 0 10px;"></span> Bulk add your server local files on queue.
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="input-group">
-                                                <input type="text" id="path"  class="form-control" placeholder="Local Path of videos i.e. /media/videos"/>
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-secondary" id="pathBtn">
-                                                        <span class="glyphicon glyphicon-list"></span> List Files
-                                                    </button>
-                                                </span>
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-secondary" id="checkBtn">
-                                                        <i class="fa fa-check-square-o" aria-hidden="true"></i>
-                                                    </button>
-                                                </span>
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-secondary" id="uncheckBtn">
-                                                        <i class="fa fa-square-o" aria-hidden="true"></i>
-                                                    </button>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <?php
-                                        if (!empty($_SESSION['login']->categories)) {
-                                            ?>
-                                            <div class="form-group">
-                                                <select class="form-control" id="bulk_categories_id" name="bulk_categories_id">
-
-                                                    <option value="0">Category - Use site default</option>
-                                                    <?php
-                                                    foreach ($_SESSION['login']->categories as $key => $value) {
-                                                        echo '<option value="' . $value->id . '">' . $value->name . '</option>';
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div> 
-                                            <?php
-                                        }
-                                        ?>
-                                        <ul class="list-group" id="files">
-                                        </ul>
-                                        <button class="btn btn-block btn-primary" id="addQueueBtn">Add on Queue</button>
-                                    </div>
-                                <?php } ?>
-                            </div> 
+                                </div>
+                            </div>
                         </div>
                     </div>
 
