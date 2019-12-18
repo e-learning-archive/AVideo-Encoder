@@ -1,7 +1,4 @@
 #!/bin/bash
 
-source ../.env
-
-cd "$DOCKER_COMPOSE"
-eval $(docker-machine env default)
-docker-compose run --rm coursera -ca "$1" --cache-syllabus --only-syllabus "$2"
+# syntax: syllabus.sh <cauth> <course>
+docker exec -t $(docker ps -a --filter "name=coursera" --format "{{.Names}}") /app/coursera-dl -ca "$1" --cache-syllabus --only-syllabus "$2" 2>&1
