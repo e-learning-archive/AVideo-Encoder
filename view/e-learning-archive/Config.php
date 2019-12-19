@@ -10,12 +10,20 @@ class Config {
         return $config;
     }
 
-    public static function get($key) {
+    public static function get($key = '') {
         $config = self::getConfig();
-        if (property_exists($config, $key)) {
-            return $config->$key;
+
+        $parts = explode(".", $key);
+        $current = $config;
+
+        while ($section = array_shift($parts)) {
+            if (is_object($current) && property_exists($current, $section)) {
+                $current = $current->$section;
+            } else {
+                return null;
+            }
         }
 
-        return null;
+        return $current;
     }
 }
