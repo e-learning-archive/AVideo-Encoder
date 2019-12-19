@@ -1,4 +1,4 @@
-// we only have jQuery and Bootstrap 3.3 here, no ES6, no React....
+// we only have jQuery 3.2 and Bootstrap 3.3 here, no ES6, no React....
 // Bootstrap docs https://getbootstrap.com/docs/3.3/
 const $ = jQuery = window.jQuery;
 
@@ -88,13 +88,24 @@ function validate(modal, page) {
     }
 }
 
-function getCourseraSyllabus(data) {
+function getCourseraSyllabus(data, progress) {
     console.log("getCourseraSyllabus");
     return new Promise(function(resolve, reject) {
         $.ajax({
             url: '/view/e-learning-archive/controllers/coursera.php',
             method: 'get',
-            data: data
+            data: data,
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                xhr.addEventListener(
+                    "progress",
+                    function(evt){
+                        progress(xhr.responseText)
+                    },
+                    false
+                );
+                return xhr;
+            },
         })
             .done(resolve)
             .fail(reject)
@@ -107,27 +118,24 @@ function showPage(modal, page) {
             //
             break;
         case 2:
-            let spinner = $(modal).find('.modal-split').eq(page - 1).find('.loader');
-            let content = $(modal).find('.modal-split').eq(page - 1).find('.content');
-            let url = $('input[name=coursera-link]', modal).val()
-            let cauth = $('#cauth', modal).val()
-            getCourseraSyllabus({
-                url: url,
-                cauth: cauth,
-            }).then(
-                function(response) {
+            var spinner = $(modal).find('.modal-split').eq(page - 1).find('.loader');
+            var content = $(modal).find('.modal-split').eq(page - 1).find('.content');
+            var url = $('input[name=coursera-link]', modal).val();
+            var cauth = $('#cauth', modal).val();
+
+            var update = function(response) {
+                spinner.hide();
+                content.empty().append(response);
+            };
+            var error = function(response) {
                     spinner.hide();
-                    content.empty().append(response);
-                },
-                function(response) {
-                    spinner.hide();
-                    console.log(response);
                     content.empty().append(
                         "<h2>Error!</h2><p>Could not get the Coursera syllabus for <a href='" + url + "'>" + url + "</a></p>" +
                         "<p>Received <strong>code " + response.status + "</strong> and the following output: <div class='alert alert-danger'>" + response.responseText + "</div>"
                     );
-                },
-            );
+                };
+
+            getCourseraSyllabus({url: url, cauth: cauth}, update).then(update, error);
             break;
     }
 }

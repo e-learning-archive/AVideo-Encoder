@@ -2,7 +2,7 @@
     <div class="copy-target"><!-- This will contain the course URL --></div>
 
     <label for="cauth">Authentication code</label>
-    <input class="form-control" id="cauth" name="cauth" required value="3V7ue8iN5WSRDq8GkADkCqwPpVGgG15lbZStyK81rH0HMyuPaiZOmkv8Ml_72NFevOLbOdCGy14iIFnIay6Q5w.44TOW5kM0QylD8UCSfpHtQ.NgrtBQhWqnl3RzUnuMpKYycEtcUnGJpG4JxdjoF_K-OTqv-Sv607pPWBjlJG51srbwu2Lm8PRGN8s_-jGrksawhHNUx8aVtJagAeAZ81clWKb1Pd9DwfxKFfD5Oo1hPaw6Sr4YAhHJlU1-WtwBhMwa3KNoW9jcvGZaso_l767Zal_fUCKpOJ3SvhGlCGtStg" type="text"/>
+    <input class="form-control" id="cauth" name="cauth" required value="FXqci22omCOvcwetavpGQv-U4u7ptJVqkoXvoF1lViAOH4oHLLPyRSgv4gMoWflvToBkf9lkhc5UpUP9w2nPeA.sYEbPIAeXMzIA5griN9RAw.khPtn3AGU6j3srTChEV30DpDyheyQoUlQnh-Yf1SwWh877nShZyMPSfKgGjgMEKAEhHyf6zUB6XsD-n2nKx0o0ZW83gANNN5ea0no6NEpOYbBWOM9QBA-rvAwyL8wPtGTK5ObdluJz7Usvf80oiQHx-dJnPJa1mMa6dhZuVBYhIWkNFC3wPQvK9RDcQRTzGp" type="text"/>
     <div class="error-message"></div>
     <small class="form-text text-muted">
         The easiest way to get this authentication code is by
