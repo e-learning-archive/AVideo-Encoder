@@ -17,6 +17,9 @@
                     <div class="modal-split">
                         <?php require(__DIR__ . "/modal/step-2.php"); ?>
                     </div>
+                    <div class="modal-split">
+                        <?php require(__DIR__ . "/modal/step-3.php"); ?>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">

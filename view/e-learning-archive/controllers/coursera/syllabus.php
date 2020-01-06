@@ -1,87 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../Config.php';
+require_once __DIR__ . '/../../Config.php';
+require_once __DIR__ . '/../controller.php';
 
-class CourseraController {
-    protected $url;
-    protected $cauth;
-
-    public function __construct() {
-        $this->url = $_GET["url"];
-        $this->cauth = $_GET["cauth"];
-
-        $this->course = $this->extractCourse($this->url);
-
-        if (!$this->course) {
-            $this->invalidUrl();
-        }
-    }
-
-    protected function path($file) {
-        return rtrim(Config::get('downloads.coursera'), '/') . '/' . $file;
-    }
-
-    protected function invalidUrl() {
-        http_response_code(400);
-        die("
-Invalid URL.<br /><br />
-This is either not a Coursera URL, or it is malformed.<br />
-A valid URL looks something like this:\n\nhttps://www.coursera.org/learn/some-course-name/home/welcome
-");
-    }
-
-    protected function extractCourse($url) {
-        $re = '/https:\/\/(www\.)?coursera\.org\/learn\/([\w\-]+)\/?.*/m';
-
-        preg_match_all($re, $url, $matches, PREG_SET_ORDER, 0);
-
-        if (count($matches)>0) {
-            $match = current($matches);
-            return $match[2];
-        }
-
-        return false;
-    }
-
-    public function runCmd($cmd) {
-        $retCode = null;
-        // execute the shell script. The code below is basically 'passthru()' but without buffering.
-        ob_end_flush();
-        $handle = popen($cmd, 'r');
-
-        // Continuously scroll to the bottom of the output element.
-        // This PHP code is requested with an ajax call with a 'progress' handler, which renders all
-        // of the output every time that it receives an update. Therefore, the javascript below is
-        // executed many (many) times, not just once, so we don't have to do a setInterval or
-        // setTimeout or something.
-        echo "<div id='cmd-output-container'>";
-        echo "<script>jQuery('#cmd-output').scrollTop(jQuery('#cmd-output')[0].scrollHeight);</script>";
-        echo "<pre style='height: 80vh; overflow: auto;' id='cmd-output'>";
-        while (!feof($handle)) {
-            echo fgets($handle, 256);
-            ob_flush();
-            flush();
-        }
-        echo "\n\n\nProgram ended.";
-        echo "</pre>";
-        $retCode = pclose($handle);
-
-        if (intval($retCode) !== 0) {
-            echo "<strong>Program ended with exit code $retCode</strong>";
-        }
-        echo "</div>";
-
-        return intval($retCode);
-    }
+class SyllabusController extends CourseraController {
 
     protected function syllabusPath() {
         return $this->path($this->course . "-syllabus-parsed.json");
-    }
-
-    protected function error($message, $code = 500) {
-        http_response_code($code);
-        echo $message;
-        die;
     }
 
     protected function parseSyllabus() {
@@ -154,6 +79,7 @@ A valid URL looks something like this:\n\nhttps://www.coursera.org/learn/some-co
     protected function showSyllabus() {
         $syllabus = $this->parseSyllabus();
         $id = 'tree_' . mt_rand(10000, 99999);
+        echo "<div class='logical-form-group'>";
         echo "<strong>Please select the courses you want to share this week</strong><br /><br />";
         echo "<ul class='checktree' id='$id'>";
         foreach ($syllabus as $module_title=>$module) {
@@ -183,7 +109,8 @@ A valid URL looks something like this:\n\nhttps://www.coursera.org/learn/some-co
                     $lecture_title_esc = htmlentities("$lecture_title");
                     $value = "$module_title_esc/$section_title_esc/$lecture_title_esc";
                     $id = md5($value);
-                    echo "<input name='syllabus[]' value='$value' id='$id' type='checkbox' /><label for='$id'>$lecture_title_esc</label>";
+                    $count = count($files);
+                    echo "<input name='syllabus[]' value='$value' id='$id' type='checkbox' data-video-count='$count' /><label for='$id'>$lecture_title_esc ($count videos)</label>";
                     echo '</li>';
                 }
                 echo '</ul>';
@@ -194,21 +121,31 @@ A valid URL looks something like this:\n\nhttps://www.coursera.org/learn/some-co
             echo '</li>';
         }
         echo '</ul>';
+        echo '<div class=\'error-message\'></div>';
+        echo '</div>';
         echo "<script>jQuery('#$id').checktree()</script>";
     }
 
     public function run() {
         $syllabus = $this->syllabusPath();
         if (file_exists($syllabus)) {
+            $hour = 60 * 60;
+            if (time() - filectime($syllabus) > 1 * $hour) {
+                // delete syllabus if it's too old (it contains time-limited download links)
+                unlink($syllabus);
+            }
+        }
+
+        if (file_exists($syllabus)) {
             $this->showSyllabus();
         } else {
-            $cmd = dirname(__DIR__) . '/scripts/coursera/syllabus.sh ' . escapeshellarg($this->cauth) . ' ' . escapeshellarg($this->course);
+            $cmd = dirname(__DIR__) . '/../scripts/coursera/syllabus.sh ' . escapeshellarg($this->cauth) . ' ' . escapeshellarg($this->course);
 
             $retCode = $this->runCmd($cmd);
 
             if ($retCode === 0) {
                 if (file_exists($syllabus)) {
-                    echo "<script>jQuery('#cmd-output-container').empty()</script>";
+                    echo "<script>jQuery('.cmd-output-container').empty()</script>";
                     $this->showSyllabus();
                 }
             } else {
@@ -218,4 +155,4 @@ A valid URL looks something like this:\n\nhttps://www.coursera.org/learn/some-co
     }
 }
 
-(new CourseraController())->run();
+(new SyllabusController())->run();

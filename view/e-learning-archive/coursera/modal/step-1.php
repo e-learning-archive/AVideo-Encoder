@@ -1,9 +1,13 @@
 <div class="form-group">
+    <div class="logical-form-group">
     <div class="copy-target"><!-- This will contain the course URL --></div>
+    </div>
 
     <label for="cauth">Authentication code</label>
-    <input class="form-control" id="cauth" name="cauth" required value="FXqci22omCOvcwetavpGQv-U4u7ptJVqkoXvoF1lViAOH4oHLLPyRSgv4gMoWflvToBkf9lkhc5UpUP9w2nPeA.sYEbPIAeXMzIA5griN9RAw.khPtn3AGU6j3srTChEV30DpDyheyQoUlQnh-Yf1SwWh877nShZyMPSfKgGjgMEKAEhHyf6zUB6XsD-n2nKx0o0ZW83gANNN5ea0no6NEpOYbBWOM9QBA-rvAwyL8wPtGTK5ObdluJz7Usvf80oiQHx-dJnPJa1mMa6dhZuVBYhIWkNFC3wPQvK9RDcQRTzGp" type="text"/>
+    <div class="logical-form-group">
+    <input class="form-control" id="cauth" name="cauth" required value="_Mi15is-7iooAzulW0-4HBLrIwtB5A8HSP5-C7RyOXA0dr8ncJ9GNxCDnrTA--5Zj7bzguS2Blrq_ejqG1vfoA.7zJ_9odCNDhN97jN0bzARQ.F-NaOM9PuoZpgqH_01UzOWXsD_2thzYYyOYXZF9o5xpvhL19XntlMyBdZngxLCQmg7zHQ2tU5O5H81t829saEdjsf6J__ZDBAtG0FVOMo6YGIYEwp8XFssqwXt-xzNlXC3xNXdHvxCOSgpOxWc7Ubd28iTjR3Twnq0wmx3oyDMY2D3i-EDvyxl44bkbn83Cy" type="text"/>
     <div class="error-message"></div>
+    </div>
     <small class="form-text text-muted">
         The easiest way to get this authentication code is by
         <a id="open-browser-extension-tooltip"

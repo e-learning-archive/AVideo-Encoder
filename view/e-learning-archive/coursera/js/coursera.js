@@ -51,14 +51,14 @@ const $ = jQuery = window.jQuery;
 
 
 function isValid(element, validation, message) {
-    if (validation(element.val())) {
+    if (validation(element)) {
         element.removeClass('error');
-        element.siblings('.error-message').empty();
+        element.eq(0).closest('.logical-form-group').find('.error-message').empty();
         return true;
     }
 
     element.addClass('error');
-    element.siblings('.error-message').empty().append(document.createTextNode(message))
+    element.eq(0).closest('.logical-form-group').find('.error-message').empty().append(document.createTextNode(message))
     return false;
 }
 
@@ -66,13 +66,13 @@ function validate(modal, page) {
     console.log("Validate page", page, "on modal", modal)
     var form = $('form', modal);
     console.log("Validate form", form)
-    const required = function(val) {
-        return val.trim().length > 0
+    const required = function(element) {
+        return element.val().trim().length > 0
     };
 
+    var has_error = false;
     switch (page) {
         case 1:
-            var has_error = false;
             has_error |= !isValid(
                 $('input[name=coursera-link]', form),
                 required,
@@ -84,58 +84,122 @@ function validate(modal, page) {
                 "This field is required"
             );
 
-            return ! has_error;
+            break;
+        case 2:
+            var checkboxes = $('input[name=syllabus\\[\\]]', form);
+            has_error |= !isValid(
+                checkboxes,
+                function(element) { return $('input[name=syllabus\\[\\]]:checked', form).length > 0; },
+                "Please select at least one"
+            )
+                
     }
+
+    return ! has_error;
 }
 
 function getCourseraSyllabus(data, progress) {
     console.log("getCourseraSyllabus");
     return new Promise(function(resolve, reject) {
         $.ajax({
-            url: '/view/e-learning-archive/controllers/coursera.php',
+            url: '/view/e-learning-archive/controllers/coursera/syllabus.php',
             method: 'get',
             data: data,
-            xhr: function() {
-                var xhr = new window.XMLHttpRequest();
-                xhr.addEventListener(
-                    "progress",
-                    function(evt){
-                        progress(xhr.responseText)
-                    },
-                    false
-                );
-                return xhr;
-            },
+            xhr: xhr(progress),
         })
             .done(resolve)
             .fail(reject)
     });
 }
 
+function xhr(progress) {
+    return function() {
+        var xhr = new window.XMLHttpRequest();
+        xhr.addEventListener(
+            "progress",
+            function(evt){
+                progress(xhr.responseText)
+            },
+            false
+        );
+        return xhr;
+    }
+}
+
+function downloadLectures(data, progress) {
+    console.log("downloadLectures");
+
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: '/view/e-learning-archive/controllers/coursera/download.php',
+            method: 'post',
+            data: data,
+            xhr: xhr(progress),
+
+            // we need the following two to be able to use
+            // a FormData object in a jQuery ajax request
+            processData: false,
+            contentType: false,
+        })
+            .done(resolve)
+            .fail(reject)
+    });
+
+}
+
 function showPage(modal, page) {
+    var spinner = $(modal).find('.modal-split').eq(page - 1).find('.loader');
+    var content = $(modal).find('.modal-split').eq(page - 1).find('.content');
+    var update = function (response) {
+        spinner.hide();
+        content.empty().append(response);
+    };
+    var error = function(message) {
+        return function (response) {
+            spinner.hide();
+            content.empty().append(
+                "<h2>Error!</h2>" + message +
+                "<p>Received <strong>code " + response.status + "</strong> and the following output: <div class='alert alert-danger'>" + response.responseText + "</div>"
+            );
+        };
+    };
+    var url = $('input[name=coursera-link]', modal).val();
+    var cauth = $('#cauth', modal).val();
+
     switch (page) {
         case 1:
-            //
+            // nothing
             break;
+
         case 2:
-            var spinner = $(modal).find('.modal-split').eq(page - 1).find('.loader');
-            var content = $(modal).find('.modal-split').eq(page - 1).find('.content');
-            var url = $('input[name=coursera-link]', modal).val();
-            var cauth = $('#cauth', modal).val();
+            getCourseraSyllabus({url: url, cauth: cauth}, update).then(update, error("<p>Could not get the Coursera syllabus for <a href='" + url + "'>" + url + "</a></p>"));
+            break;
 
-            var update = function(response) {
-                spinner.hide();
-                content.empty().append(response);
-            };
-            var error = function(response) {
-                    spinner.hide();
-                    content.empty().append(
-                        "<h2>Error!</h2><p>Could not get the Coursera syllabus for <a href='" + url + "'>" + url + "</a></p>" +
-                        "<p>Received <strong>code " + response.status + "</strong> and the following output: <div class='alert alert-danger'>" + response.responseText + "</div>"
-                    );
-                };
+        case 3:
+            var data = new FormData();
+            data.append('url', url);
+            data.append('cauth', cauth);
 
-            getCourseraSyllabus({url: url, cauth: cauth}, update).then(update, error);
+            $(modal)
+                .find('.modal-split')
+                .eq(page - 2)
+                .find('.content input:checked')
+                .filter(function() {
+                    var hasData = (typeof $(this).data('video-count') !== 'undefined');
+                    if (hasData) {
+                        return $(this).data('video-count') > 0;
+                    }
+                    return false;
+                })
+                .each(function() {
+                    data.append('syllabus[]', this.getAttribute('value'));
+                });
+
+            downloadLectures(data, update)
+                .then(
+                    update,
+                    error("<p>There was an error downloading the Coursera lectures</p>")
+                );
             break;
     }
 }
