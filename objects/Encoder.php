@@ -1161,6 +1161,16 @@ class Encoder extends ObjectYPT {
             if (is_file($file))
                 unlink($file); // delete file
         }
+
+        // attempt to delete original source file
+        if (is_file($this->fileURI)) {
+            // try to make it writable first
+            @chmod(dirname($this->fileURI), 0777);
+            @chmod($this->fileURI, 0666);
+
+            // do it
+            @unlink($this->fileURI);
+        }
         return true;
     }
 
