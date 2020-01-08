@@ -251,7 +251,6 @@ if (!empty($_GET['noNavbar'])) {
                             if (empty($global['disableConfigurations'])) {
                                 ?>
                                 <li><a data-toggle="tab" href="#config"><span class="glyphicon glyphicon-cog"></span> Configurations</a></li>
-                                <li <?php if (!empty($_POST['updateFile'])) { ?>class="active"<?php } ?>><a data-toggle="tab" href="#update" ><span class="fa fa-wrench"></span> Update <?php if (!empty($updateFiles)) { ?><label class="label label-danger"><?php echo count($updateFiles); ?></label><?php } ?></a></li>
                                 <?php
                             }
                             ?>
@@ -319,11 +318,6 @@ if (!empty($_GET['noNavbar'])) {
                                     </div>
 
                                     <button class="btn btn-success btn-block" id="saveConfig"> Save </button>
-                                </div>
-                                <div id="update" class="tab-pane fade <?php if (!empty($_POST['updateFile'])) { ?>in active<?php } ?>">
-                                    <?php
-                                    include '../update/update.php';
-                                    ?>
                                 </div>
                                 <?php
                             }
