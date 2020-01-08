@@ -63,9 +63,7 @@ function isValid(element, validation, message) {
 }
 
 function validate(modal, page) {
-    console.log("Validate page", page, "on modal", modal)
     var form = $('form', modal);
-    console.log("Validate form", form)
     const required = function(element) {
         return element.val().trim().length > 0
     };
@@ -229,7 +227,7 @@ function prepareModal() {
             next.setAttribute("class", "btn btn-primary");
             next.innerHTML = nextLabel;
 
-            $(this).find('.modal-footer').append(back).append(next);
+            $(this).find('.modal-footer').empty().append(back).append(next);
 
 
             var page = 0;
@@ -296,6 +294,8 @@ function init() {
                     .clone()
                     .removeClass('row')
             );
+
+        prepareModal();
 
         $(".browser").hide();
         if ($.browser.chrome) {
