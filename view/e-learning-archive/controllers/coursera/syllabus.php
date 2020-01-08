@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../Config.php';
-require_once __DIR__ . '/../controller.php';
+require_once __DIR__ . '/controller.php';
 
 class SyllabusController extends CourseraController {
 

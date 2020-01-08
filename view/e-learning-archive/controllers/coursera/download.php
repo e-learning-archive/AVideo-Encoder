@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../../../../videos/configuration.php';
 require_once __DIR__ . '/../../Config.php';
-require_once __DIR__ . '/../controller.php';
+require_once __DIR__ . '/controller.php';
 require_once __DIR__ . '/../../../../objects/Encoder.php';
 require_once __DIR__ . '/../../../../objects/Streamer.php';
 require_once __DIR__ . '/../../../../objects/Login.php';
