@@ -510,7 +510,4 @@ function init() {
 
 $(function () {
     init();
-    // DEV HELPER
-    // $('#coursera-tab button').get(0).click()
-    $('a[href="#edx"]').get(0).click(); $('#edx-tab button').get(0).click()
 });

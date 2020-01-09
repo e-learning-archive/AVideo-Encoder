@@ -17,6 +17,11 @@ abstract class CourseraController extends Controller {
         if (!$this->course) {
             $this->invalidUrl();
         }
+
+        // store cauth and url in the session so that on the next visit
+        // it can be pre-filled in the form
+        $_SESSION['coursera-cauth'] = $this->cauth;
+        $_SESSION['coursera-url'] = $this->url;
     }
 
     protected function extractCourse($url)

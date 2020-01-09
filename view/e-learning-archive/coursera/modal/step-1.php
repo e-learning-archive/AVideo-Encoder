@@ -5,7 +5,7 @@
 
     <label for="cauth">Authentication code</label>
     <div class="logical-form-group">
-    <input class="form-control" id="cauth" name="cauth" required value="_Mi15is-7iooAzulW0-4HBLrIwtB5A8HSP5-C7RyOXA0dr8ncJ9GNxCDnrTA--5Zj7bzguS2Blrq_ejqG1vfoA.7zJ_9odCNDhN97jN0bzARQ.F-NaOM9PuoZpgqH_01UzOWXsD_2thzYYyOYXZF9o5xpvhL19XntlMyBdZngxLCQmg7zHQ2tU5O5H81t829saEdjsf6J__ZDBAtG0FVOMo6YGIYEwp8XFssqwXt-xzNlXC3xNXdHvxCOSgpOxWc7Ubd28iTjR3Twnq0wmx3oyDMY2D3i-EDvyxl44bkbn83Cy" type="text"/>
+    <input class="form-control" id="cauth" name="cauth" required value="<?php echo htmlentities($_SESSION['coursera-cauth']); ?>" type="text"/>
     <div class="error-message"></div>
     </div>
     <small class="form-text text-muted">
