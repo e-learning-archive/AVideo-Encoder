@@ -3,7 +3,7 @@
 const $ = jQuery = window.jQuery;
 
 /**
- * jQuery Get Browser Plugin
+ * jQuery "Get Browser" Plugin
  *
  * @version: 1.01
  * @author: Pablo E. Fernández (islavisual@gmail.com).
@@ -62,7 +62,7 @@ function isValid(element, validation, message) {
     return false;
 }
 
-function validate(modal, page) {
+function validateCoursera(modal, page) {
     var form = $('form', modal);
     const required = function(element) {
         return element.val().trim().length > 0
@@ -90,14 +90,25 @@ function validate(modal, page) {
                 function(element) { return $('input[name=syllabus\\[\\]]:checked', form).length > 0; },
                 "Please select at least one"
             )
-                
+
     }
 
     return ! has_error;
 }
 
+function validateEdx(modal, page) {
+    return true;
+}
+
+function validate(modal, page) {
+    if (isCoursera(modal)) {
+        return validateCoursera(modal, page);
+    } else {
+        return validateEdx(modal, page);
+    }
+}
+
 function getCourseraSyllabus(data, progress) {
-    console.log("getCourseraSyllabus");
     return new Promise(function(resolve, reject) {
         $.ajax({
             url: '/view/e-learning-archive/controllers/coursera/syllabus.php',
@@ -124,9 +135,7 @@ function xhr(progress) {
     }
 }
 
-function downloadLectures(data, progress) {
-    console.log("downloadLectures");
-
+function downloadCoursera(data, progress) {
     return new Promise(function(resolve, reject) {
         $.ajax({
             url: '/view/e-learning-archive/controllers/coursera/download.php',
@@ -142,17 +151,70 @@ function downloadLectures(data, progress) {
             .done(resolve)
             .fail(reject)
     });
-
 }
 
-function showPage(modal, page) {
-    var spinner = $(modal).find('.modal-split').eq(page - 1).find('.loader');
-    var content = $(modal).find('.modal-split').eq(page - 1).find('.content');
-    var update = function (response) {
+function getEdxCourses(data, progress) {
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: '/view/e-learning-archive/controllers/edx/courses.php',
+            method: 'post',
+            data: data,
+            xhr: xhr(progress),
+        })
+            .done(resolve)
+            .fail(reject)
+    });
+}
+function getEdxSections(data, progress) {
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: '/view/e-learning-archive/controllers/edx/sections.php',
+            method: 'post',
+            data: data,
+            xhr: xhr(progress),
+        })
+            .done(resolve)
+            .fail(reject)
+    });
+}
+
+function downloadEdx(data, progress) {
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: '/view/e-learning-archive/controllers/edx/download.php',
+            method: 'post',
+            data: data,
+            xhr: xhr(progress),
+
+            // we need the following two to be able to use
+            // a FormData object in a jQuery ajax request
+            processData: false,
+            contentType: false,
+        })
+            .done(resolve)
+            .fail(reject)
+    });
+}
+
+function getSpinner(modal, page) {
+    return $(modal).find('.modal-split').eq(page - 1).find('.loader');
+}
+function getContent(modal, page) {
+    return $(modal).find('.modal-split').eq(page - 1).find('.content');
+}
+function createProgressFunction(modal, page) {
+    var spinner = getSpinner(modal, page);
+    var content = getContent(modal, page);
+    return function (response) {
         spinner.hide();
         content.empty().append(response);
     };
-    var error = function(message) {
+}
+function createErrorFunction(modal, page) {
+    var spinner = getSpinner(modal, page);
+    var content = getContent(modal, page);
+
+    return function(message) {
         return function (response) {
             spinner.hide();
             content.empty().append(
@@ -160,9 +222,16 @@ function showPage(modal, page) {
                 "<p>Received <strong>code " + response.status + "</strong> and the following output: <div class='alert alert-danger'>" + response.responseText + "</div>"
             );
         };
-    };
+    }
+}
+
+
+function showCourseraModalPage(modal, page) {
     var url = $('input[name=coursera-link]', modal).val();
     var cauth = $('#cauth', modal).val();
+
+    var update = createProgressFunction(modal, page);
+    var error = createErrorFunction(modal, page);
 
     switch (page) {
         case 1:
@@ -170,7 +239,8 @@ function showPage(modal, page) {
             break;
 
         case 2:
-            getCourseraSyllabus({url: url, cauth: cauth}, update).then(update, error("<p>Could not get the Coursera syllabus for <a href='" + url + "'>" + url + "</a></p>"));
+            getCourseraSyllabus({url: url, cauth: cauth}, update)
+                .then(update, error("<p>Could not get the Coursera syllabus for <a href='" + url + "'>" + url + "</a></p>"));
             break;
 
         case 3:
@@ -193,7 +263,7 @@ function showPage(modal, page) {
                     data.append('syllabus[]', this.getAttribute('value'));
                 });
 
-            downloadLectures(data, update)
+            downloadCoursera(data, update)
                 .then(
                     update,
                     error("<p>There was an error downloading the Coursera lectures</p>")
@@ -202,7 +272,92 @@ function showPage(modal, page) {
     }
 }
 
-function prepareModal() {
+function showEdxModalPage(modal, page) {
+    var username = $('input[name=edx-username]').val();
+    var password = $('input[name=edx-password]').val();
+    var update = createProgressFunction(modal, page);
+    var error = createErrorFunction(modal, page);
+
+    var course_url = $('input[name=course_url]:checked').val();
+    var course_title = $('input[name=course_url]:checked+label').text();
+
+    switch (page) {
+        case 1:
+            getEdxCourses({username: username, password: password}, update)
+                .then(update, error("<p>Error retrieving list of edX courses</p>"));
+            break;
+
+        case 2:
+            getEdxSections( {username: username, password: password, course_url: course_url, course_title: course_title}, update)
+                .then(update, error("<p>Could not get the edX sections for '" + course_title + "' course</p>"));
+            break;
+
+        case 3:
+            var data = new FormData();
+            data.append('username', username);
+            data.append('password', password);
+            data.append('course_url', course_url);
+            data.append('course_title', course_title);
+
+            var section_titles = $('input[name=section\\[\\]]:checked+label').map(function(i,e) {
+                return $(e).text();
+            }).get();
+
+            $('input[name=section\\[\\]]:checked').each(function(i,e) {
+                data.append('sections[' + $(e).val() + ']', section_titles[i]);
+            });
+
+            downloadEdx(data, update)
+                .then(
+                    update,
+                    error("<p>There was an error downloading the Coursera lectures</p>")
+                );
+            break;
+    }
+}
+
+function isCoursera(modal) {
+    return $(modal).is('#courseraModal');
+}
+
+function isEdx(modal) {
+    return !isCoursera(modal);
+}
+
+function showPage(modal, page) {
+    if (isCoursera(modal)) {
+        showCourseraModalPage(modal, page);
+    } else {
+        showEdxModalPage(modal, page);
+    }
+}
+
+function setModalButtonsState(enabled) {
+    $('.modal-footer button').attr('disabled', !enabled);
+}
+
+function disableModalButtons() {
+    setModalButtonsState(false);
+}
+
+function enableModalButtons() {
+    setModalButtonsState(true);
+}
+
+function showOnlyCloseButtonOnModal() {
+    var close = document.createElement("button");
+    close.setAttribute("type", "button");
+    close.setAttribute("class", "btn btn-primary");
+    close.innerHTML = 'Close';
+
+    $('.modal-footer').empty().append(close);
+
+    $(close).on('click', function() {
+        $('.modal').modal('hide');
+    })
+}
+
+function prepareModals() {
     $(".modal.multi-step").each(function () {
 
         var nextLabel = 'Continue ';
@@ -283,8 +438,7 @@ function prepareModal() {
     });
 }
 
-
-function init() {
+function initCoursera() {
     $('#coursera-tab button').on('click', function () {
         // manipulate the DOM like a barbarian
         $("#courseraModal .copy-target")
@@ -295,7 +449,7 @@ function init() {
                     .removeClass('row')
             );
 
-        prepareModal();
+        prepareModals();
 
         $(".browser").hide();
         if ($.browser.chrome) {
@@ -317,9 +471,22 @@ function init() {
             return $(this).data('tooltip-title');
         }
     });
+}
 
-    prepareModal();
+function initEdx() {
+    $('#edx-tab button').on('click', function () {
+        prepareModals();
 
+        var modal = $('#edxModal');
+        showPage(modal, 1);
+    });
+}
+
+function init() {
+    initCoursera();
+    initEdx();
+
+    prepareModals();
 }
 
 
@@ -344,5 +511,6 @@ function init() {
 $(function () {
     init();
     // DEV HELPER
-    $('#coursera-tab button').get(0).click()
+    // $('#coursera-tab button').get(0).click()
+    $('a[href="#edx"]').get(0).click(); $('#edx-tab button').get(0).click()
 });

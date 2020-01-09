@@ -361,9 +361,7 @@ if (!empty($_GET['noNavbar'])) {
 		                            <?php require('e-learning-archive/coursera/tab.php'); ?>
 	                            </div>
 	                            <div id="edx" class="tab-pane fade">
-		                            <div class="alert alert-info">
-			                            <span class="glyphicon glyphicon-info-sign"></span> Share videos from edX.
-		                            </div>
+                                    <?php require('e-learning-archive/edx/tab.php'); ?>
 	                            </div>
                                 <div id="download" class="tab-pane fade ">
                                     <div class="alert alert-info">

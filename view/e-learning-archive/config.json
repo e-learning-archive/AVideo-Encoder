@@ -1,6 +1,6 @@
 {
   "downloads": {
     "coursera": "/var/www/coursera/",
-    "ed-x": "/var/www/ed-x/"
+    "edx": "/var/www/ed-x/"
   }
 }

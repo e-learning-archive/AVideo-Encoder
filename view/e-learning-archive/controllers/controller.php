@@ -1,12 +1,18 @@
 <?php
+session_start(); // need this in some of my code, and we're not using a framework here to do these things for us...
 
 abstract class Controller {
+    protected $output = '';
 
     protected function error($message, $code = 500)
     {
         http_response_code($code);
         echo $message;
         die;
+    }
+
+    protected function getCmdOutput() {
+        return $this->output;
     }
 
     public function runCmd($cmd)
@@ -24,10 +30,14 @@ abstract class Controller {
         // executed many (many) times, not just once, so we don't have to do a setInterval or
         // setTimeout or something.
         echo "<div class='cmd-output-container'>";
-        echo "<script>jQuery('#cmd-output-{$hash}').scrollTop(jQuery('#cmd-output-{$hash}')[0].scrollHeight);</script>";
+        echo "<script>jQuery('#cmd-output-{$hash}').scrollTop(jQuery('#cmd-output-{$hash}')[0].scrollHeight);disableModalButtons();</script>";
         echo "<pre style='height: 80vh; overflow: auto;' id='cmd-output-{$hash}'>";
+        $this->output = '';
         while (!feof($handle)) {
-            echo fgets($handle, 256);
+            $line = fgets($handle, 1024);
+            $this->output .= $line;
+
+            echo $line;
             ob_flush();
             flush();
         }
@@ -39,6 +49,7 @@ abstract class Controller {
             echo "<strong>Program ended with exit code $retCode</strong>";
         }
         echo "</div>";
+        echo "<script>enableModalButtons();</script>";
 
         return intval($retCode);
     }

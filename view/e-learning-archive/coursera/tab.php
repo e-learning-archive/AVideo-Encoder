@@ -1,11 +1,3 @@
-<?php
-/**
- *
- * @author e-learning-archive
- */
-
-?>
-
 <div class="alert alert-info">
     <span class="glyphicon glyphicon-info-sign"></span> Share videos from Coursera.
 </div>
@@ -21,5 +13,4 @@
     <button type="button" class="btn btn-primary" data-toggle='modal' data-target='#courseraModal' style="float:right">Next &raquo;</button>
     <?php require('modal.php'); ?>
 </div>
-<script src="/view/e-learning-archive/coursera/js/coursera.js"></script>
 <link rel="stylesheet" href="/view/e-learning-archive/css/styles.css" />
