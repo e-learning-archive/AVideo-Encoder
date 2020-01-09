@@ -81,9 +81,9 @@ if (!class_exists('Login')) {
                         $s->setPass($pass);
                         $s->save();
                         $cookieLife = time() + 3600 * 24 * 2; // 2 day
-                        setcookie("user", $user, $cookieLife, "/");
-                        setcookie("pass", $pass, $cookieLife, "/");
-                        setcookie("aVideoURL", $aVideoURL, $cookieLife, "/");
+                        @setcookie("user", $user, $cookieLife, "/");
+                        @setcookie("pass", $pass, $cookieLife, "/");
+                        @setcookie("aVideoURL", $aVideoURL, $cookieLife, "/");
                     }
                 } else {
                     $object = new stdClass();
