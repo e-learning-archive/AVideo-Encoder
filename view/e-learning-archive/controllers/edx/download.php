@@ -3,9 +3,6 @@
 require_once __DIR__ . '/../../../../videos/configuration.php';
 require_once __DIR__ . '/../../Config.php';
 require_once __DIR__ . '/controller.php';
-require_once __DIR__ . '/../../../../objects/Encoder.php';
-require_once __DIR__ . '/../../../../objects/Streamer.php';
-require_once __DIR__ . '/../../../../objects/Login.php';
 require_once __DIR__ . '/../downloadTrait.php';
 
 class EdxDownloadController extends EdxController {
@@ -14,12 +11,16 @@ class EdxDownloadController extends EdxController {
     protected $course_url;
     protected $course_title;
     protected $sections;
+    protected $slug;
 
     public function __construct() {
         parent::__construct();
         $this->course_url = $_REQUEST['course_url'];
         $this->course_title = $_REQUEST['course_title'];
         $this->sections = $_REQUEST['sections'];
+
+        // this is the folder in which edx-dl downloads the course
+        $this->slug = str_replace(' ', '_', trim($this->course_title));
     }
 
     /**
@@ -29,13 +30,49 @@ class EdxDownloadController extends EdxController {
      * @param $success_ids
      */
     protected function encode($success_ids) {
-        echo "Encode " . print_r($success_ids, true);
-        die;
+        $download_folder = rtrim(Config::get('downloads.edx'), '/') . '/' . $this->slug . '/';
+        $rdi = new RecursiveDirectoryIterator(
+            $download_folder,
+            FilesystemIterator::KEY_AS_PATHNAME |
+            FilesystemIterator::CURRENT_AS_FILEINFO |
+            FilesystemIterator::SKIP_DOTS
+        );
+        $rii = new RecursiveIteratorIterator($rdi);
 
-    }
+        $category_id = $this->getCategoryId(
+            str_replace('_', '-', $this->slug),
+            $this->course_title
+        );
 
-    protected function getDownloadFolder() {
-        return rtrim(Config::get('downloads.edx'), '/') . '/';
+        $success_ids = array_map('intval', $success_ids);
+
+        foreach ($rii as $file) {
+            // $file is something like
+            // /var/www/ed-x/Anthropology_of_Current_World_Issues/01-Getting_started/01-Episode 0 - Getting Started.mp4
+            //
+            // we transform it so that $relative_path is something like
+            // 01-Getting_started/01-Episode 0 - Getting Started.mp4
+            $relative_path = trim(trim(str_replace($download_folder, '', $file)), '/');
+
+            // now we misuse PHP's intval() function to convert $relative_path into
+            // a number, which it does by converting everything until it reads a non-numeric character
+            // -> so in our example, $section_id would be '1'
+            $section_id = intval($relative_path);
+
+            // we only import this file if that section is in the 'success_ids'
+            if (!in_array($section_id, $success_ids)) {
+                echo "<li>Not importing $relative_path</li>";
+                continue;
+            }
+
+            if ($this->isVideo($file->getPathname())) {
+                // we only import video files
+                $result = $this->queue($file->getPathname(), $category_id);
+                if ($result->error) {
+                    $this->error($result->msg);
+                }
+            }
+        }
     }
 
     /**
@@ -47,7 +84,6 @@ class EdxDownloadController extends EdxController {
         $base_cmd = dirname(__DIR__) . '/../scripts/edx/download.sh ';
         $base_cmd .= escapeshellarg($this->username) . ' ';
         $base_cmd .= escapeshellarg($this->password) . ' ';
-        $base_cmd .= escapeshellarg($this->getDownloadFolder()) . ' ';
         $base_cmd .= escapeshellarg($this->course_url) . ' ';
 
         $success = [];
@@ -63,7 +99,7 @@ class EdxDownloadController extends EdxController {
             $retCode = $this->runCmd($cmd);
 
             if ($retCode === 0) {
-//                echo "<script>jQuery('#download-{$hash}').empty();</script>";
+                echo "<script>jQuery('#download-{$hash}').empty();</script>";
                 $success[] = $title;
                 $success_ids[] = $number;
             } else {
@@ -71,7 +107,6 @@ class EdxDownloadController extends EdxController {
             }
             echo "</div>";
         }
-        echo $this->getCmdOutput();
         $this->status($success, $failure);
 
         // encode the videos we managed to obtain

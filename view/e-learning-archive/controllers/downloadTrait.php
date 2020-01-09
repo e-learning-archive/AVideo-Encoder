@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../../objects/Encoder.php';
+require_once __DIR__ . '/../../../objects/Streamer.php';
+require_once __DIR__ . '/../../../objects/Login.php';
 
 trait DownloadTrait {
 
@@ -23,6 +26,18 @@ trait DownloadTrait {
             echo "<ul><li>" . implode('</li><li>', $failure) . '</li></ul>';
         }
         echo "</div>";
+    }
+
+    protected function isVideo($filename)
+    {
+        $video_extensions = [
+            'mp4', 'm4a', 'm4v', 'f4v', 'f4a', 'm4b', 'm4r', 'f4b', 'mov', '3gp', '3gp2', '3g2', '3gpp', '3gpp2',
+            'ogg', 'oga', 'ogv', 'ogx', 'wmv', 'wma', 'asf', 'webm', 'flv', 'avi', 'qt',
+        ];
+
+        $info = pathinfo($filename);
+
+        return (in_array(strtolower($info['extension']), $video_extensions));
     }
 
     protected function getCategoryName($slug) {

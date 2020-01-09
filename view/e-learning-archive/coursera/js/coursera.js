@@ -310,7 +310,7 @@ function showEdxModalPage(modal, page) {
             downloadEdx(data, update)
                 .then(
                     update,
-                    error("<p>There was an error downloading the Coursera lectures</p>")
+                    error("<p>There was an error downloading the edX lectures</p>")
                 );
             break;
     }

@@ -4,9 +4,6 @@ require_once __DIR__ . '/../../../../videos/configuration.php';
 require_once __DIR__ . '/../../Config.php';
 require_once __DIR__ . '/controller.php';
 require_once __DIR__ . '/../downloadTrait.php';
-require_once __DIR__ . '/../../../../objects/Encoder.php';
-require_once __DIR__ . '/../../../../objects/Streamer.php';
-require_once __DIR__ . '/../../../../objects/Login.php';
 
 class DownloadController extends CourseraController {
     use DownloadTrait;
@@ -40,6 +37,7 @@ class DownloadController extends CourseraController {
         $rii = new RecursiveIteratorIterator($rdi);
 
         $files = array();
+        $category_id = $this->getCategoryId($this->course, $this->getCategoryName($this->course));
 
         foreach ($rii as $file) {
 
@@ -58,7 +56,6 @@ class DownloadController extends CourseraController {
                 ) {
                     // $p and $this_file have the same module, section, and lecture
                     // -> queue the file to be encoded
-                    $category_id = $this->getCategoryId($this->course, $this->getCategoryName($this->course));
                     $result = $this->queue($file->getPathname(), $category_id);
                     if ($result->error) {
                         $this->error($result->msg);
