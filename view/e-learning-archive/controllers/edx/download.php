@@ -20,7 +20,26 @@ class EdxDownloadController extends EdxController {
         $this->sections = $_REQUEST['sections'];
 
         // this is the folder in which edx-dl downloads the course
-        $this->slug = str_replace(' ', '_', trim($this->course_title));
+        $this->slug = $this->createSlug($this->course_title);
+    }
+
+    protected function createSlug($course_title) {
+        // translated to PHP from
+        // https://github.com/coursera-dl/edx-dl/blob/master/edx_dl/utils.py#L113
+        $unescaped = html_entity_decode(urldecode($course_title));
+        $stripped = str_replace(':', '-', $unescaped);
+        $stripped = str_replace('/', '-', $stripped);
+        $stripped = str_replace(chr(0), '-', $stripped);
+        $stripped = str_replace("\n", '-', $stripped);
+        $stripped = str_replace('(', '', $stripped);
+        $stripped = str_replace(')', '', $stripped);
+        $stripped = rtrim($stripped, '.');
+
+        $stripped = str_replace(' ', '_', $stripped);
+
+        $stripped = preg_replace('/[^a-zA-Z0-9\-_\.\(\)]/', '', $stripped);
+
+        return $stripped;
     }
 
     /**
