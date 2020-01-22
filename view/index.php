@@ -129,16 +129,13 @@ if (!empty($_GET['noNavbar'])) {
                             <fieldset>
                                 <legend>Please sign in</legend>
 
-
-                                <div class="form-group">
-                                    <label class="col-md-4 control-label">Streamer Site</label>  
-                                    <div class="col-md-8 inputGroupContainer">
-                                        <div class="input-group">
-                                            <span class="input-group-addon"><i class="glyphicon glyphicon-globe"></i></span>
-                                            <input  id="siteURL" placeholder="http://www.your-tube-site.com" class="form-control"  type="url" value="<?php echo $streamerURL; ?>" required >
-                                        </div>
-                                    </div>
-                                </div>
+                                <?php
+                                /* The 'siteURL' is hardcoded for our e-learning-archive. That's because we need to have
+                                 * a 'weird' value here that always works regardless of the DNS setup of the encoder
+                                 * and the streamer. So, we need to specify the login location in a way that it can be
+                                 * accessed from within Docker. In our setup, that means it's http://streamer:8000/
+                                 **/ ?>
+                                <input type="hidden" id="siteURL" class="form-control" value="http://streamer:8000/" />
                                 <div class="form-group">
                                     <label class="col-md-4 control-label">User</label>  
                                     <div class="col-md-8 inputGroupContainer">
